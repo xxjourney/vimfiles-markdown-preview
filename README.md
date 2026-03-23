@@ -5,8 +5,9 @@ Personal Vim configuration with Markdown in-editor/browser preview.
 ## Features
 
 - Markdown preview:
-    - **Windows GVim** — converts to HTML and opens in the default browser (dark mode, supports code blocks, tables)
-    - **WSL / Linux Terminal Vim** — renders in a vertical split terminal via `glow` or `python3+rich`
+    - **Windows GVim** — converts to HTML and opens in the default browser (dark mode, supports code blocks, tables, images)
+    - **WSL** — converts to HTML (images embedded as base64) and opens in the default Windows browser
+    - **Pure Linux Terminal Vim** — renders in a vertical split terminal via `glow` or `python3+rich`
 - Plugin: `plasticboy/vim-markdown` for better syntax highlighting
 - Persistent undo, relative line numbers, smart search
 
@@ -92,6 +93,8 @@ Wait for `vim-markdown` to finish, then restart GVim.
 2. Save it with `:w`
 3. Press `F4` — the default browser should open with a dark-mode rendered preview
 
+![Preview Effect](preview.png)
+
 ---
 
 ## Setup: WSL / Linux (Terminal Vim)
@@ -148,8 +151,7 @@ vim +PlugInstall +qall
 
 1. Open any `.md` file: `vim file.md`
 2. Save with `:w`
-3. Press `F4` — a vertical split opens on the right with rendered Markdown
-4. Press `F4` again to close, or press `q` inside the terminal pane
+3. Press `F4` — the default Windows browser opens with a dark-mode rendered preview (images included)
 
 ---
 
@@ -157,8 +159,7 @@ vim +PlugInstall +qall
 
 The preview is a one-shot render. After editing and saving (`:w`):
 
-- **Windows**: Press `F4` — a new browser tab opens with updated content
-- **WSL**: Press `F4` twice (close + reopen)
+- **Windows / WSL**: Press `F4` — a new browser tab opens with updated content
 
 ---
 
@@ -168,8 +169,9 @@ The preview is a one-shot render. After editing and saving (`:w`):
 |-----------|--------------|
 | Windows, `markdown` package installed | `markdown` (full support) |
 | Windows, no `markdown` package | Built-in regex fallback (headings, bold, italic, code blocks) |
-| WSL, `glow` installed | `glow` |
-| WSL, no `glow` | `python3 + rich` |
+| WSL | Browser (via `python3` + `wslpath` + `cmd.exe`) |
+| Pure Linux, `glow` installed | `glow` (terminal split) |
+| Pure Linux, no `glow` | `python3 + rich` (terminal split) |
 
 ---
 

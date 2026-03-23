@@ -71,8 +71,9 @@ function! s:OpenBrowserPreview()
     let l:htmlfile = tempname() . '.html'
 
     call writefile([
-        \ 'import sys, re, html as h',
+        \ 'import sys, os, re, html as h, base64, mimetypes',
         \ 'infile, outfile = sys.argv[1], sys.argv[2]',
+        \ 'infile_dir = os.path.dirname(os.path.abspath(infile)).replace("\\\\", "/") + "/"',
         \ 'text = open(infile, encoding="utf-8").read()',
         \ 'try:',
         \ '    import markdown',
@@ -100,14 +101,29 @@ function! s:OpenBrowserPreview()
         \ '            t = re.sub(r"^## (.+)$", r"<h2>\1</h2>", t, flags=re.M)',
         \ '            t = re.sub(r"^# (.+)$", r"<h1>\1</h1>", t, flags=re.M)',
         \ '            t = re.sub(r"^&gt; (.+)$", r"<blockquote>\1</blockquote>", t, flags=re.M)',
+        \ '            t = re.sub(r"!\[(.*?)\]\((.*?)\)", r"<img src=\"\2\" alt=\"\1\">", t)',
+        \ '            t = re.sub(r"\[(.*?)\]\((.*?)\)", r"<a href=\"\2\">\1</a>", t)',
         \ '            t = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", t)',
         \ '            t = re.sub(r"\*(.+?)\*", r"<em>\1</em>", t)',
         \ '            t = re.sub(r"`(.+?)`", r"<code>\1</code>", t)',
         \ '            out.append("<br>\n".join(t.split("\n")))',
         \ '    body = "".join(out)',
-        \ 'css = "body{font-family:sans-serif;max-width:860px;margin:40px auto;padding:0 24px;line-height:1.6;background:#1e1e2e;color:#cdd6f4}h1,h2,h3{border-bottom:1px solid #45475a;padding-bottom:.3em;color:#cba6f7}a{color:#89b4fa}code{background:#313244;padding:2px 6px;border-radius:3px;color:#a6e3a1}pre{background:#313244;padding:16px;border-radius:6px;overflow-x:auto;position:relative}pre code{background:none;padding:0;color:#cdd6f4}.copy-btn{position:absolute;top:8px;right:8px;background:#45475a;color:#cdd6f4;border:none;border-radius:4px;padding:4px 8px;cursor:pointer;font-size:12px;opacity:0;transition:opacity .2s}pre:hover .copy-btn{opacity:1}.copy-btn.copied{background:#a6e3a1;color:#1e1e2e}blockquote{border-left:4px solid #45475a;margin:0 0 1em 0;padding:0 16px;color:#a6adc8}table{border-collapse:collapse;width:100%}th,td{border:1px solid #45475a;padding:6px 12px;text-align:left}th{background:#313244;color:#cba6f7}"',
+        \ '_bd = os.path.dirname(os.path.abspath(infile))',
+        \ 'def _ii(html):',
+        \ '    def r(m):',
+        \ '        s = m.group(2)',
+        \ '        if s.startswith(("http://", "https://", "data:", "//")): return m.group(0)',
+        \ '        p = os.path.join(_bd, s)',
+        \ '        if not os.path.isfile(p): return m.group(0)',
+        \ '        mt = mimetypes.guess_type(p)[0] or "image/png"',
+        \ '        b64 = base64.b64encode(open(p,"rb").read()).decode()',
+        \ '        return m.group(1) + "data:" + mt + ";base64," + b64 + m.group(3)',
+        \ '    q = chr(34)',
+        \ '    return re.sub("(<img[^>]*src=" + q + ")(.*?)(" + q + ")", r, html)',
+        \ 'body = _ii(body)',
+        \ 'css = "body{font-family:sans-serif;max-width:860px;margin:40px auto;padding:0 24px;line-height:1.6;background:#1e1e2e;color:#cdd6f4}h1,h2,h3{border-bottom:1px solid #45475a;padding-bottom:.3em;color:#cba6f7}a{color:#89b4fa}code{background:#313244;padding:2px 6px;border-radius:3px;color:#a6e3a1}pre{background:#313244;padding:16px;border-radius:6px;overflow-x:auto;position:relative}pre code{background:none;padding:0;color:#cdd6f4}.copy-btn{position:absolute;top:8px;right:8px;background:#45475a;color:#cdd6f4;border:none;border-radius:4px;padding:4px 8px;cursor:pointer;font-size:12px;opacity:0;transition:opacity .2s}pre:hover .copy-btn{opacity:1}.copy-btn.copied{background:#a6e3a1;color:#1e1e2e}blockquote{border-left:4px solid #45475a;margin:0 0 1em 0;padding:0 16px;color:#a6adc8}table{border-collapse:collapse;width:100%}th,td{border:1px solid #45475a;padding:6px 12px;text-align:left}th{background:#313244;color:#cba6f7}img{max-width:100%;height:auto;border-radius:8px;margin:1em 0}"',
         \ 'js = "<script>document.querySelectorAll(\"pre\").forEach(function(p){var b=document.createElement(\"button\");b.className=\"copy-btn\";b.textContent=\"Copy\";b.onclick=function(){var t=p.querySelector(\"code\")?p.querySelector(\"code\").innerText:p.innerText;navigator.clipboard.writeText(t).then(function(){b.textContent=\"Copied!\";b.classList.add(\"copied\");setTimeout(function(){b.textContent=\"Copy\";b.classList.remove(\"copied\")},2000)})};p.appendChild(b)})</script>"',
-        \ 'page = "<!DOCTYPE html><html><head><meta charset=utf-8><title>Preview</title><style>{}</style></head><body>{}{}</body></html>".format(css, body, js)',
+        \ 'page = "<!DOCTYPE html><html><head><meta charset=utf-8><title>Preview</title><base href=\"{}\"><style>{}</style></head><body>{}{}</body></html>".format(infile_dir, css, body, js)',
         \ 'open(outfile, "w", encoding="utf-8").write(page)',
         \ ], l:pyfile)
 
@@ -116,22 +132,32 @@ function! s:OpenBrowserPreview()
     let $MD_PY_IN     = l:filepath
     let $MD_PY_OUT    = l:htmlfile
 
-    " Always go through cmd.exe regardless of &shell (e.g. Git Bash)
-    " Try python, python3, py (Windows Launcher) in order
-    let l:ran = 0
-    for l:py in ['python', 'python3', 'py']
-        let l:out = system('cmd /c ' . l:py . ' "%MD_PY_SCRIPT%" "%MD_PY_IN%" "%MD_PY_OUT%"')
-        if v:shell_error == 0
-            let l:ran = 1
-            break
+    if has('win32') || has('win64')
+        " Always go through cmd.exe regardless of &shell (e.g. Git Bash)
+        " Try python, python3, py (Windows Launcher) in order
+        let l:ran = 0
+        for l:py in ['python', 'python3', 'py']
+            let l:out = system('cmd /c ' . l:py . ' "%MD_PY_SCRIPT%" "%MD_PY_IN%" "%MD_PY_OUT%"')
+            if v:shell_error == 0
+                let l:ran = 1
+                break
+            endif
+        endfor
+        if !l:ran
+            echom 'Python not found. Install from https://www.python.org/downloads/ and check "Add to PATH"'
+            return
         endif
-    endfor
-    if !l:ran
-        echom 'Python not found. Install from https://www.python.org/downloads/ and check "Add to PATH"'
-        return
+        call system('cmd /c start "" "%MD_PY_OUT%"')
+    else
+        " WSL: use python3 directly, open via Windows browser
+        call system('python3 "$MD_PY_SCRIPT" "$MD_PY_IN" "$MD_PY_OUT"')
+        if v:shell_error != 0
+            echom 'python3 not found or failed to generate HTML'
+            return
+        endif
+        let $MD_WIN_OUT = trim(system('wslpath -w ' . shellescape(l:htmlfile)))
+        call system('cmd.exe /c start "" "%MD_WIN_OUT%"')
     endif
-
-    call system('cmd /c start "" "%MD_PY_OUT%"')
     redraw!
 endfunction
 
@@ -169,8 +195,12 @@ function! s:OpenTerminalPreview()
     call win_gotoid(l:origin_win)
 endfunction
 
+function! s:IsWSL()
+    return has('unix') && filereadable('/proc/sys/fs/binfmt_misc/WSLInterop')
+endfunction
+
 function! ToggleMarkdownPreview()
-    if has('win32') || has('win64')
+    if has('win32') || has('win64') || s:IsWSL()
         call s:OpenBrowserPreview()
     else
         if s:IsMarkdownPreviewOpen()
