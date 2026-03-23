@@ -185,7 +185,7 @@ endfunction
 " Keybindings
 " =============================================================================
 nnoremap <leader>p :call ToggleMarkdownPreview()<CR>
-nnoremap <F5> :call ToggleMarkdownPreview()<CR>
+nnoremap <F4> :call ToggleMarkdownPreview()<CR>
 
 " =============================================================================
 " Auto-close preview on leaving markdown buffer (Unix only)

@@ -14,7 +14,7 @@ Personal Vim configuration with Markdown in-editor/browser preview.
 
 | Key | Action |
 |-----|--------|
-| `F5` | Toggle Markdown preview (both platforms) |
+| `F4` | Toggle Markdown preview (both platforms) |
 | `,p` | Toggle Markdown preview (both platforms) |
 | `q` (in terminal pane) | Close preview from inside (WSL only) |
 
@@ -90,7 +90,7 @@ Wait for `vim-markdown` to finish, then restart GVim.
 
 1. Open any `.md` file in GVim
 2. Save it with `:w`
-3. Press `F5` — the default browser should open with a dark-mode rendered preview
+3. Press `F4` — the default browser should open with a dark-mode rendered preview
 
 ---
 
@@ -148,8 +148,8 @@ vim +PlugInstall +qall
 
 1. Open any `.md` file: `vim file.md`
 2. Save with `:w`
-3. Press `F5` — a vertical split opens on the right with rendered Markdown
-4. Press `F5` again to close, or press `q` inside the terminal pane
+3. Press `F4` — a vertical split opens on the right with rendered Markdown
+4. Press `F4` again to close, or press `q` inside the terminal pane
 
 ---
 
@@ -157,8 +157,8 @@ vim +PlugInstall +qall
 
 The preview is a one-shot render. After editing and saving (`:w`):
 
-- **Windows**: Press `F5` — a new browser tab opens with updated content
-- **WSL**: Press `F5` twice (close + reopen)
+- **Windows**: Press `F4` — a new browser tab opens with updated content
+- **WSL**: Press `F4` twice (close + reopen)
 
 ---
 
