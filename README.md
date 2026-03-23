@@ -56,14 +56,30 @@ iwr -useb https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim |`
 
 ### Step 5 — Set up vimrc
 
-**Option A — Symlink (requires running as Administrator):**
+**Option A — Clone to `%USERPROFILE%\vimfiles` (simplest, no extra steps):**
 
-Open Command Prompt as Administrator:
+GVim on Windows automatically loads `%USERPROFILE%\vimfiles\vimrc` if it exists.
+Clone this repo directly to that location:
+
+```
+git clone https://github.com/xxjourney/vimfiles-markdown-preview.git %USERPROFILE%\vimfiles
+```
+
+No `_vimrc` needed. GVim picks it up automatically.
+
+---
+
+**Option B — Repo is elsewhere: create `_vimrc` manually**
+
+GVim does not auto-create `_vimrc`. You need to create it yourself at `%USERPROFILE%\_vimrc`.
+
+*Option B-1 — Symlink (requires Administrator):*
+
 ```
 mklink %USERPROFILE%\_vimrc C:\path\to\vimfiles\vimrc
 ```
 
-**Option B — Source from `_vimrc` (no admin needed):**
+*Option B-2 — Source (no admin needed):*
 
 Create `%USERPROFILE%\_vimrc` with this single line (adjust path):
 ```vim
