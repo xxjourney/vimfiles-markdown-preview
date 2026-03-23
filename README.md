@@ -16,7 +16,7 @@ Personal Vim configuration with Markdown in-editor/browser preview.
 | Key | Action |
 |-----|--------|
 | `F4` | Toggle Markdown preview (both platforms) |
-| `,p` | Toggle Markdown preview (both platforms) |
+| `,m` | Toggle Markdown preview (both platforms) |
 | `q` (in terminal pane) | Close preview from inside (WSL only) |
 
 ---

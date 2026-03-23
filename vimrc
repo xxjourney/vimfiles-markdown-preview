@@ -214,7 +214,7 @@ endfunction
 " =============================================================================
 " Keybindings
 " =============================================================================
-nnoremap <leader>p :call ToggleMarkdownPreview()<CR>
+nnoremap ,m :call ToggleMarkdownPreview()<CR>
 nnoremap <F4> :call ToggleMarkdownPreview()<CR>
 
 " =============================================================================
